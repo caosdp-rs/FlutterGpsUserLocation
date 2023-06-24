@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -55,6 +57,27 @@ class _GelLocationAppState extends State<GeolocationApp> {
     }
   }
 
+  enviarDadosParaServidor(String latitude, String longitude) async {
+    var url = 'http://192.168.0.107/receber_dados.php';
+
+    var body = json.encode({
+      'latitude': latitude,
+      'longitude': longitude,
+    });
+
+    var response = await http.post(Uri.parse(url),
+        headers: {'Content-Type': 'application/json'}, body: body);
+
+    if (response.statusCode == 200) {
+      // Dados enviados com sucesso
+      print('Dados enviados com sucesso!');
+    } else {
+      // Ocorreu um erro ao enviar os dados
+      print(
+          'Erro ao enviar os dados. Código de status: ${response.statusCode}');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,7 +111,7 @@ class _GelLocationAppState extends State<GeolocationApp> {
                   _currentLocation = await _getCurrentLocation();
                   print("$_currentLocation");
                   await _getAddressFromCoordinates();
-
+                  await enviarDadosParaServidor("30.0", "80.0");
                   print("$_currentAddress");
                   print("Testando o botão");
                 },
